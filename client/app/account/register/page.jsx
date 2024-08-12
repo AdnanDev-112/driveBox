@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
 import Link from 'next/link';
-import {useState} from 'react'
+import { useState } from 'react'
 
 const RegisterPage = () => {
     const [email, setEmail] = useState('');
@@ -19,14 +19,16 @@ const RegisterPage = () => {
         const data = await response.json();
         console.log(data);
         alert(data.message);
-        alert('User registered successfully');  
+        alert('User registered successfully');
     };
 
     return (
         <>
             <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
                 <div className="sm:mx-auto sm:w-full sm:max-w-sm flex flex-col  justify-center items-center">
-                    <Image src={"/logo.png"} alt='Site Logo' width={150} height={150} />
+                    <div onClick={() => { window.location.href = '/'; }} className="cursor-pointer">
+                        <Image src={"/logo.png"} alt='Site Logo' width={150} height={150} />
+                    </div>
                     <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
                         Register your account
                     </h2>

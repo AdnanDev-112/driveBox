@@ -38,6 +38,7 @@ const ProtectedComponent = (Component) => {
             }
             
             else {
+              localStorage.clear();
                 router.push('/');
             }
           } catch (err) {
