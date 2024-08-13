@@ -3,10 +3,13 @@ import Image from 'next/image'
 import Link from 'next/link'
 import {ethers} from 'ethers';
 import { useEffect, useState } from 'react';
+import FaceRecognitionModal from '@/app/components/FaceRecognition/FaceRecognitionModal';
 
 
 const AccountPage = () => {
   const [isMetamaskInstalled, setIsMetamaskInstalled] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [data, setData] = useState({});
 
   useEffect(() => {
     setIsMetamaskInstalled(!!window.ethereum);
@@ -58,19 +61,48 @@ const AccountPage = () => {
       console.log(token);
 
       //const { token } = await response.json();
+      setIsModalOpen(true);
+      setData({ walletAddress: address , token: token.token });
 
       // Store the JWT token in local storage
-      localStorage.setItem(address, token.token);
+      // localStorage.setItem(address, token.token);
 
       // Redirect the user to the protected route
-      window.location.href = '/mydrive';
+      // window.location.href = '/mydrive';
     } catch (error) {
       console.error(error);
       alert('Failed to login with Metamask');
     }
   }
+
+  const handleVerify = async (imageSrc) => {
+    // Send the screenshot to the verification API
+    // const response = await fetch('/api/verify', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   },
+    //   body: JSON.stringify({ image: imageSrc, address })
+    // });
+    console.log(imageSrc);
+    
+
+    // const result = await response.json();
+    // if (result.success) {
+    //   // Redirect the user to the protected route
+    //   window.location.href = '/mydrive';
+    // } else {
+    //   alert('Verification failed. Access denied.');
+    // }
+  };
   return (
     <>
+    <FaceRecognitionModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        btnText={"Authenticate"}
+        data={data}
+      />
       <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm flex flex-col  justify-center items-center">
         <div onClick={() => { window.location.href = '/'; }} className="cursor-pointer">

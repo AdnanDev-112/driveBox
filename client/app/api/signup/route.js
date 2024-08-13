@@ -35,11 +35,13 @@ export async function POST(req = NextApiRequest, res = NextApiResponse) {
 	  // Respond with the blockchain private key
 	  // res.status(200).json({ message: blockchainPrivateKey });
     // console.log({ message: blockchainPrivateKey });
-    return new Response(JSON.stringify({ message: blockchainPrivateKey }), {
+    return new Response(JSON.stringify({ message: blockchainPrivateKey , walletAddress: blockchainAddress }), {
       status: 200,
     })
 	} catch (error) {
-	  console.error(error);
-	  res.status(500).json({ message: 'An error occurred' });
+	  console.error(error.message);
+	  return new Response(JSON.stringify({ message: "'An error occurred'" }), {
+		status: 500,
+	  })
 	} 
 }

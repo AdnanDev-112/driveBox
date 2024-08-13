@@ -2,12 +2,17 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react'
+import FaceRecognitionModal from '@/app/components/FaceRecognition/FaceRecognitionModal';
 
 const RegisterPage = () => {
     const [email, setEmail] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [userAddress, setUserAddress] = useState(null);
+    const [disabled, setDisabled] = useState(false);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        setDisabled(true);
         const response = await fetch('/api/signup', {
             method: 'POST',
             headers: {
@@ -18,12 +23,22 @@ const RegisterPage = () => {
         console.log(response)
         const data = await response.json();
         console.log(data);
+        if(!response.ok) return
         alert(data.message);
+        setUserAddress(data.walletAddress);
         alert('User registered successfully');
+        setIsModalOpen(true);
+        // window.location.reload();
     };
 
     return (
         <>
+            <FaceRecognitionModal
+                isOpen={isModalOpen}
+                onClose={setIsModalOpen}
+                btnText={"Register"}
+                data={{ walletAddress: userAddress }}
+            />
             <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
                 <div className="sm:mx-auto sm:w-full sm:max-w-sm flex flex-col  justify-center items-center">
                     <div onClick={() => { window.location.href = '/'; }} className="cursor-pointer">
@@ -56,7 +71,8 @@ const RegisterPage = () => {
                         <div>
                             <button
                                 type="submit"
-                                className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                                className={`flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                disabled={disabled}
                             >
                                 Sign Up
                             </button>
