@@ -51,8 +51,8 @@ const faceAuthLogin = async (image) => {
 
 export async function POST(req, res) {
   const { imageSrc } = await req.json();
-
-  const faces = await faceAuthLogin(imageSrc);
+  try {
+    const faces = await faceAuthLogin(imageSrc);
   if(faces.length > 0) {
     return new Response(JSON.stringify({ message: 'Face Authenticated' }), {
       status: 200,
@@ -62,4 +62,14 @@ export async function POST(req, res) {
       status: 401,
     })
   }
+  } catch (error) {
+    console.log("No Face Detected");
+    return new Response(JSON.stringify({ message: 'No Face Detected' }), {
+      status: 400,
+    })
+    
+    
+  }
+
+  
 }

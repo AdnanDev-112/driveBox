@@ -4,20 +4,37 @@ import Webcam from 'react-webcam';
 // import * as AWS from 'aws-sdk';
 // import Rekognition from 'aws-sdk/clients/rekognition';
 // import S3 from 'aws-sdk/clients/s3';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
-const FaceRecognitionModal = ({ isOpen, onClose, onVerify, btnText, data }) => {
+
+const FaceRecognitionModal = ({ isOpen, onClose, onVerify, btnText, data, setterFunction }) => {
     const webcamRef = useRef(null);
 
     const capture = () => {
         const imageSrc = webcamRef.current.getScreenshot();
         // onVerify(imageSrc);
-        btnText === "Register" ? registerNewUser(imageSrc) : verifyUser(imageSrc);
+        // btnText === "Register" ? registerNewUser(imageSrc) : loginUser(imageSrc);
+        switch (btnText) {
+            case "Register":
+                registerNewUser(imageSrc);
+                break;
+            case "Authenticate":
+                loginUser(imageSrc);
+                break;
+            case "Verify":
+                verifyUser(imageSrc);
+                break;
+
+            default:
+                break;
+        }
     };
 
     const registerNewUser = async (imageSrc) => {
         console.log(imageSrc);
-        
+
         const response = await fetch('http://localhost:3000/api/faceAuth/register', {
             method: 'POST',
             headers: {
@@ -31,13 +48,23 @@ const FaceRecognitionModal = ({ isOpen, onClose, onVerify, btnText, data }) => {
             onClose(false);
 
         } else {
-            console.log('error came up');
-            
+            toast.error('Access Denied', {
+                position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                
+            });
+
             // Handle registration error
         }
     }
 
-    const verifyUser = async (imageSrc) => {
+    const loginUser = async (imageSrc) => {
         const response = await fetch('http://localhost:3000/api/faceAuth/login', {
             method: 'POST',
             headers: {
@@ -53,12 +80,86 @@ const FaceRecognitionModal = ({ isOpen, onClose, onVerify, btnText, data }) => {
 
 
         } else {
-            console.log('error came up');
-            throw new Error('Face not authenticated');
-            
+            toast.error('  Access Denied!', {
+                position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                
+            });
+
             // Handle registration error
         }
     }
+    const verifyUser = async (imageSrc) => {
+        const response = await fetch('http://localhost:3000/api/faceAuth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ imageSrc })
+        });
+        if (response.status === 200) {
+            console.log('Face Authenticated');
+            setterFunction(prevMap => {
+                const newMap = new Map(prevMap);
+                newMap.set(data, false);
+                return newMap;
+            });
+            toast.success('Access Granted', {
+                position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                
+            });
+            setTimeout(() => {
+                onClose(false);
+            }, 2000);
+
+
+
+        } else if (response.status === 401) {
+            toast.error('Access Denied', {
+                position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                
+            });
+            setTimeout(() => {
+                onClose(false);
+            }, 2000);
+        }else{
+            toast.error('No Face Detected', {
+                position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                
+            });
+            setTimeout(() => {
+                onClose(false);
+            }, 2000);
+        }
+    }
+
 
 
     if (!isOpen) return null;
@@ -67,8 +168,9 @@ const FaceRecognitionModal = ({ isOpen, onClose, onVerify, btnText, data }) => {
 
     return (
         <>
+            <ToastContainer />
 
-            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-10">
                 <div className="bg-white p-6 rounded-lg shadow-lg">
                     <h2 className="text-2xl mb-4">Face Recognition</h2>
                     <Webcam

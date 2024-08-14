@@ -408,7 +408,7 @@
 //                             <div className="bg-white p-5 shadow rounded-lg flex flex-col items-center relative" key={index}>
 //                                 <Image src={item} width={200} height={200} alt='File' className="mt-2" />
 //                                 <div className="h-8">
-                                    
+
 //                                 </div>
 //                                 <div className="absolute bottom-2 right-2 flex space-x-2">
 //                                     <TrashIcon className='h-10 w-10 text-red-400 cursor-pointer' onClick={() => handleTrashClick(item)} />
@@ -431,16 +431,18 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
+import axios from 'axios';
 import Image from 'next/image';
-import { DocumentTextIcon, FolderOpenIcon, MagnifyingGlassIcon, TrashIcon, ShareIcon } from '@heroicons/react/24/outline'; // Added ShareIcon
 import Upload from "../components/artifacts/contracts/UploadFile.sol/UploadFile.json";
 import UserNavbar from '../components/User-Navbar/UserNavbar';
 import UploadFileIpfs from '../components/Upload-Ipfs-Modal/UploadFileIpfs';
 import ShareFileModal from '../components/ShareFileModal/ShareFileModal'; // Import ShareModal
-import axios from 'axios';
 import ProtectedComponent from '@/utils/protectedComponent';
+import { DocumentTextIcon, FolderOpenIcon, MagnifyingGlassIcon, TrashIcon, ShareIcon, LockClosedIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'; // Added ShareIcon
+import FaceRecognitionModal from '../components/FaceRecognition/FaceRecognitionModal';
 
 const MyDriveHomePage = () => {
+
     // State to manage dropdown visibility
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -452,14 +454,14 @@ const MyDriveHomePage = () => {
     const [contract, setContract] = useState(null);
     const [provider, setProvider] = useState(null);
     const [data, setData] = useState([]);
-    
+
     // Track Active Component
     const [activeComponent, setActiveComponent] = useState(0);
-    const handleComponentSwitch = (number)=>{
+    const handleComponentSwitch = (number) => {
         setActiveComponent(number);
-        if(number == 0 ){
+        if (number == 0) {
             getdata(contract, account);
-        }else{
+        } else {
             getSharedData(contract, account);
         }
 
@@ -472,9 +474,16 @@ const MyDriveHomePage = () => {
     // Share Modal
     const [isShareModalOpen, setShareModalOpen] = useState(false);
     const [currentFile, setCurrentFile] = useState(null);
-    
 
-    useEffect(() => {
+    // Lock
+    const [dataLock, setDataLock] = useState(new Map());
+    const [isFaceAuthModalOpen, setIsFaceAuthModalOpen] = useState(false);
+    const [lockedFileUrl, setLockedFileUrl] = useState(null);
+
+
+
+
+useEffect(() => {
         // Ensure `ethereum` is available in the window object
         if (window.ethereum !== null) {
             const provider = new ethers.BrowserProvider(window.ethereum);
@@ -516,9 +525,15 @@ const MyDriveHomePage = () => {
         }
         const isEmpty = dataArray ? Object.keys(dataArray).length === 0 : true;
 
-        
+
         if (!isEmpty) {
-            setData(Object.values(dataArray));
+            let tempArray = Object.values(dataArray);
+            setData(tempArray);
+            const dataMap = new Map();
+            tempArray.forEach(item => {
+                dataMap.set(item, true);
+            });
+            setDataLock(dataMap);
             console.log(Object.values(dataArray));
         } else {
             setData(Object.values(dataArray));
@@ -536,7 +551,13 @@ const MyDriveHomePage = () => {
         const isEmpty = dataArray ? Object.keys(dataArray).length === 0 : true;
 
         if (!isEmpty) {
-            setData(Object.values(dataArray));
+            let tempArray = Object.values(dataArray);
+            setData(tempArray);
+            const dataMap = new Map();
+            tempArray.forEach(item => {
+                dataMap.set(item, true);
+            });
+            setDataLock(dataMap);
             console.log(Object.values(dataArray));
         } else {
             setData(Object.values(dataArray));
@@ -569,72 +590,138 @@ const MyDriveHomePage = () => {
         setShareModalOpen(true);
     };
 
+    const handleFileUnlock = (fileUrl) => {
+        setLockedFileUrl(fileUrl);
+        setIsFaceAuthModalOpen(true);
+    }
+
+    const handleFileDownload = (fileUrl, fileName) => {
+        // using  method to Download the file
+        fetch(fileUrl).then((response) => {
+            response.blob().then((blob) => {
+
+                // Creating new object of the file
+                const fileURL =
+                    window.URL.createObjectURL(blob);
+
+                // Setting various property values
+                let alink = document.createElement("a");
+                alink.href = fileURL;
+                alink.download = fileName;
+                alink.click();
+            });
+        });
+    };
 
     return (
-        <div className="flex h-screen bg-gray-100">
-            {/* Sidebar */}
-            <div className="w-64 bg-white text-gray-700 border-r">
-                <div className="p-5 border-b">
-                    <Image src={"/logo.png"} alt='Site Logo' width={150} height={150} />
-                </div>
-                <div className="px-5 py-3 w-full">
-                    <button onClick={() => { setFileUploadModalOpen(true) }} className="bg-green-500 text-white px-4 py-2 rounded-lg h-full w-full hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-700">
-                        Upload
-                    </button>
-                </div>
-                <ul>
-                    <li className={"flex items-center p-3 hover:bg-gray-200 cursor-pointer" + (activeComponent == 0 ? " bg-gray-300" :"" )} onClick={()=>handleComponentSwitch(0)}>
-                        <FolderOpenIcon className="h-5 w-5 mr-2" /> My Drive
-                    </li>
-                    <li className={"flex items-center p-3 hover:bg-gray-200 cursor-pointer" + (activeComponent == 1 ? " bg-gray-300" :"" )} onClick={()=>handleComponentSwitch(1)}>
-                        <DocumentTextIcon className="h-5 w-5 mr-2" /> Shared with me
-                    </li>
-                </ul>
-            </div>
-
-            {/* Content Area */}
-            <div className="flex-1 flex flex-col">
-                {/* Top Bar */}
-                <div className="p-5 bg-white shadow-sm flex items-center">
-                    <div className="flex bg-gray-200 p-2 rounded-lg flex-1">
-                        <MagnifyingGlassIcon className="h-9 w-9 text-gray-500" />
-                        <input type="search" placeholder="Search in Drive" className="bg-transparent p-2 w-full focus:outline-none" />
-                    </div>
-                    <div className="ml-5 cursor-pointer" onClick={toggleDropdown}>
-                        <Image src={"/user.png"} width={50} alt='User Icon' height={50} className='' />
-                        {isDropdownOpen && <UserNavbar userAddress={account} />}
-                    </div>
-                </div>
-
-                {/* Files and Folders */}
-                <div className="flex-1 p-5 overflow-auto">
-                    <div className="grid grid-cols-4 gap-4">
-                        {data.length > 0 && activeComponent == 0  ? data.map((item, index) => (
-                            <div className="bg-white p-5 shadow rounded-lg flex flex-col items-center relative" key={index}>
-                                <Image src={item} width={200} height={200} alt='File' className="mt-2" />
-                                <div className="absolute bottom-2 right-2 flex space-x-2">
-                                    <TrashIcon className='h-10 w-10 text-red-400 cursor-pointer' onClick={() => handleTrashClick(item)} />
-                                    <ShareIcon className='h-10 w-10 text-blue-400 cursor-pointer' onClick={() => handleShareClick(item)} />
-                                </div>
-                            </div>
-                        )) :(activeComponent == 0 && data.length == 0) && <div className="text-center text-2xl text-gray-500">No files found</div>}
-                        {data.length > 0 && activeComponent == 1  ? data.map((item, index) => (
-                            <div className="bg-white p-5 shadow rounded-lg flex flex-col items-center relative" key={index}>
-                                <Image src={item} width={200} height={200} alt='File' className="mt-2" />
-                            </div>
-                        )) : (activeComponent == 1 && data.length == 0) && <div className="text-center text-2xl text-gray-500">No files found</div>}
-                    </div>
-                </div>
-            </div>
-            <UploadFileIpfs contract={contract} account={account} provider={provider} isFileUploadModalOpen={isFileUploadModalOpen} setFileUploadModalOpen={setFileUploadModalOpen} />
-            <ShareFileModal 
-                isOpen={isShareModalOpen} 
-                onClose={() => setShareModalOpen(false)} 
-                fileUrl={currentFile}  
-                contract={contract}
-                ownerAddress={account}
+        <>
+            <FaceRecognitionModal
+                isOpen={isFaceAuthModalOpen}
+                onClose={() => setIsFaceAuthModalOpen(false)}
+                btnText={"Verify"}
+                data={lockedFileUrl}
+                setterFunction={setDataLock}
             />
-        </div>
+            <div className="flex h-screen bg-gray-100">
+                {/* Sidebar */}
+                <div className="w-64 bg-white text-gray-700 border-r">
+                    <div className="p-5 border-b">
+                        <Image src={"/logo.png"} alt='Site Logo' width={150} height={150} />
+                    </div>
+                    <div className="px-5 py-3 w-full">
+                        <button onClick={() => { setFileUploadModalOpen(true) }} className="bg-green-500 text-white px-4 py-2 rounded-lg h-full w-full hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-700">
+                            Upload
+                        </button>
+                    </div>
+                    <ul>
+                        <li className={"flex items-center p-3 hover:bg-gray-200 cursor-pointer" + (activeComponent == 0 ? " bg-gray-300" : "")} onClick={() => handleComponentSwitch(0)}>
+                            <FolderOpenIcon className="h-5 w-5 mr-2" /> My Drive
+                        </li>
+                        <li className={"flex items-center p-3 hover:bg-gray-200 cursor-pointer" + (activeComponent == 1 ? " bg-gray-300" : "")} onClick={() => handleComponentSwitch(1)}>
+                            <DocumentTextIcon className="h-5 w-5 mr-2" /> Shared with me
+                        </li>
+                    </ul>
+                </div>
+
+                {/* Content Area */}
+                <div className="flex-1 flex flex-col">
+                    {/* Top Bar */}
+                    <div className="p-5 bg-white shadow-sm flex items-center">
+                        <div className="flex bg-gray-200 p-2 rounded-lg flex-1">
+                            <MagnifyingGlassIcon className="h-9 w-9 text-gray-500" />
+                            <input type="search" placeholder="Search in Drive" className="bg-transparent p-2 w-full focus:outline-none" />
+                        </div>
+                        <div className="ml-5 cursor-pointer" onClick={toggleDropdown}>
+                            <Image src={"/user.png"} width={50} alt='User Icon' height={50} className='' />
+                            {isDropdownOpen && <UserNavbar userAddress={account} />}
+                        </div>
+                    </div>
+
+                    {/* Files and Folders */}
+                    <div className="flex-1 p-5 overflow-auto">
+                        <div className="grid grid-cols-4 gap-4">
+                            {data.length > 0 && activeComponent == 0 ? data.map((item, index) => (
+                                <div className="bg-white p-5 shadow rounded-lg flex flex-col items-center relative" key={index}>
+                                    <div className="relative w-full" style={{ paddingBottom: '75%' }}> {/* 4:3 Aspect Ratio */}
+                                        <Image objectFit="cover" layout="fill" src={item} alt='File' className={`absolute inset-0 ${dataLock.get(item) ? 'filter blur-lg' : ''}`} />
+                                        {dataLock.get(item) && (
+                                            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                                                <LockClosedIcon
+                                                    className='h-10 w-10 text-white cursor-pointer'
+                                                    onClick={() => handleFileUnlock(item)}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                    {dataLock.get(item) != true ? (
+                                        <>
+                                            <div className="mt-2 w-full flex justify-between">
+                                                <div className='flex-1 flex justify-center'>
+                                                    <ShareIcon className='h-10 w-10 text-blue-400 cursor-pointer' onClick={() => handleShareClick(item)} />
+                                                </div>
+                                                <div className='flex-1 flex justify-center'>
+                                                    <ArrowDownTrayIcon className='h-10 w-10 text-blue-400 cursor-pointer' onClick={() => handleFileDownload(item, "test.jpg")} />
+                                                </div>
+                                                <div className='flex-1 flex justify-center'>
+                                                    <TrashIcon className='h-10 w-10 text-red-400 cursor-pointer' onClick={() => handleTrashClick(item)} />
+                                                </div>
+                                            </div>
+                                        </>
+                                    ) : (<></>)}
+
+
+                                </div>
+                            )) : (activeComponent == 0 && data.length == 0) && <div className="text-center text-2xl text-gray-500">No files found</div>}
+                            {data.length > 0 && activeComponent == 1 ? data.map((item, index) => (
+                                <div className="bg-white p-5 shadow rounded-lg flex flex-col items-center relative" key={index}>
+                                    {/* <Image src={item} width={200} height={200} alt='File' className="mt-2" /> */}
+                                    <div className="relative w-full" style={{ paddingBottom: '75%' }}> {/* 4:3 Aspect Ratio */}
+                                        <Image objectFit="cover" layout="fill" src={item} alt='File' className={`absolute inset-0 ${dataLock.get(item) ? 'filter blur-lg' : ''}`} />
+                                        {dataLock.get(item) && (
+                                            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                                                <LockClosedIcon
+                                                    className='h-10 w-10 text-white cursor-pointer'
+                                                    onClick={() => handleFileUnlock(item)}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )) : (activeComponent == 1 && data.length == 0) && <div className="text-center text-2xl text-gray-500">No files found</div>}
+                        </div>
+                    </div>
+                </div>
+                <UploadFileIpfs contract={contract} account={account} provider={provider} isFileUploadModalOpen={isFileUploadModalOpen} setFileUploadModalOpen={setFileUploadModalOpen} />
+                <ShareFileModal
+                    isOpen={isShareModalOpen}
+                    onClose={() => setShareModalOpen(false)}
+                    fileUrl={currentFile}
+                    contract={contract}
+                    ownerAddress={account}
+                />
+            </div>
+        </>
+
     );
 };
 

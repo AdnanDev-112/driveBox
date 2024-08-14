@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="flex flex-col min-h-screen items-center justify-between  bg-gradient-to-r from-yellow-300 to-orange-400">
+    <main className="flex flex-col min-h-screen items-center justify-between  bg-gradient-to-r from-yellow-500 to-orange-500">
       {/* Header */}
       <header className="w-full flex justify-between items-center py-2 px-4 bg-orange-200 shadow-lg">
         <h1 className="text-4xl font-extrabold text-blue-700 tracking-wide">

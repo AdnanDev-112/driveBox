@@ -5,8 +5,6 @@ import { verifyMessage } from 'ethers';
 // const secretKey = process.env.secretKey;
 const secretKey = "TEST";
 
-
-
 export  async function POST(req,res){
     const { signedMessage, nonce, address } = await req.json();
     // Ensure ethers is correctly imported and verifyMessage is available
@@ -22,7 +20,7 @@ export  async function POST(req,res){
     }
   
     // Generate the JWT token
-    const token = jwt.sign({ address }, secretKey, { expiresIn: '25s' });
+    const token = jwt.sign({ address }, secretKey, { expiresIn: '10h' });
   
     // Send the JWT token to the frontend
     return new Response(JSON.stringify({ token }), {

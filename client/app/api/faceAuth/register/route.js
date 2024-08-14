@@ -35,7 +35,7 @@ const indexFace = async (image) => {
         // create a unique id for the image
         const imageId = uuid();
         // Add face to rekognition collection
-        await rekog
+       const newIndexedFace =  await rekog
             .indexFaces({
                 CollectionId: 'compare-face-dev',
                 ExternalImageId: imageId,
@@ -44,14 +44,7 @@ const indexFace = async (image) => {
                 },
             })
             .promise();
-        // Add face to s3 bucket
-        await s3
-            .putObject({
-                Bucket: 'faceauth-boxme',
-                Key: 'faces/' + imageId + '.jpg',
-                Body: imgBuffer,
-            })
-            .promise();
+        console.log(JSON.stringify(newIndexedFace, null, 2));
     } catch (e) {
         console.error(e);
     }
