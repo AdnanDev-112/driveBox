@@ -3,9 +3,9 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="flex flex-col min-h-screen items-center justify-between  bg-gradient-to-r from-yellow-500 to-orange-500">
+    <main className="flex flex-col min-h-screen items-center justify-between  bg-gradient-to-r from-HomePageLeft to-HomePageRight">
       {/* Header */}
-      <header className="w-full flex justify-between items-center py-2 px-4 bg-orange-200 shadow-lg">
+      <header className="w-full flex justify-between items-center py-2 px-4 bg-[#F4A261] shadow-lg">
         <h1 className="text-4xl font-extrabold text-blue-700 tracking-wide">
           <Image src={"/logo.png"} height={100} width={100} />
         </h1>
@@ -38,7 +38,7 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="flex flex-col items-center justify-center text-center py-24  rounded p-10">
-        <h2 className="text-6xl font-extrabold mb-6 animate-fadeInUp">Secure Your Files with BoxMe</h2>
+        <h2 className="text-6xl font-extrabold mb-6 animate-fadeInUp ">Secure Your Files with <span className="bg-gradient-to-r from-logoLeft to-logoRight bg-clip-text text-transparent">BoxMe</span> </h2>
         <p className="text-2xl mb-10 animate-fadeInUp delay-200">
           Utilizing Facial Recognition and Blockchain Technology
         </p>

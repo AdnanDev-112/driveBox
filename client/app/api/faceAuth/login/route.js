@@ -2,6 +2,10 @@
 import * as AWS from 'aws-sdk';
 import Rekognition from 'aws-sdk/clients/rekognition';
 import S3 from 'aws-sdk/clients/s3';
+import { ethers } from 'ethers';
+import Upload from "../../../components/artifacts/contracts/UploadFile.sol/UploadFile.json";
+
+
 
 
 //   AWS Configs 
@@ -29,9 +33,7 @@ const faceAuthLogin = async (image) => {
     })
     .promise();
 
-  const images = [];
-  console.log(res.FaceMatches, "Face Matches");
-
+  // const images = [];
   // loop faces
   // for (const face of res.FaceMatches ?? []) {
   //   // get the image from s3
@@ -50,26 +52,46 @@ const faceAuthLogin = async (image) => {
 };
 
 export async function POST(req, res) {
-  const { imageSrc } = await req.json();
+  const { imageSrc ,walletAddress } = await req.json();
   try {
     const faces = await faceAuthLogin(imageSrc);
-  if(faces.length > 0) {
-    return new Response(JSON.stringify({ message: 'Face Authenticated' }), {
-      status: 200,
-    })
-  }else {
-    return new Response(JSON.stringify({ message: 'Face Not Authenticated' }), {
-      status: 401,
-    })
-  }
+    console.log(faces, "Faces");
+    const faceID = faces[0].Face.FaceId;
+
+    // Blockchain Logic :
+
+    // Connect to a public Ethereum node
+    const provider = new ethers.JsonRpcProvider("http://localhost:8545");
+
+    // Contract details
+    const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+    const contractABI = Upload.abi;
+
+    // Create a contract instance
+    const contract = new ethers.Contract(contractAddress, contractABI, provider);
+
+    // Call a read-only function
+    const decision = await contract.verifyFaceAuth(walletAddress ,faceID );
+    
+    
+
+    if (decision) {
+      return new Response(JSON.stringify({ message: 'Face Authenticated' }), {
+        status: 200,
+      })
+    } else {
+      return new Response(JSON.stringify({ message: 'Face Not Authenticated' }), {
+        status: 401,
+      })
+    }
   } catch (error) {
     console.log("No Face Detected");
     return new Response(JSON.stringify({ message: 'No Face Detected' }), {
       status: 400,
     })
-    
-    
+
+
   }
 
-  
+
 }

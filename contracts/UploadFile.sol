@@ -10,11 +10,20 @@ contract UploadFile {
     bool access;
   }
 
+  mapping(address => string) private faceAuth;
   mapping(address => string[]) private userFiles;
   mapping(address => mapping(string => mapping(address => bool))) private fileAccess;
   mapping(address => mapping(string => address[])) private fileAccessUsers;
   mapping(address => Access[]) private accessList;
   mapping(address => mapping(address => mapping(string => bool))) private previousFileAccess;
+
+  function addFaceAuth(address user, string memory faceAuthID) external {
+    faceAuth[user] = faceAuthID;
+  }
+  function verifyFaceAuth(address user, string memory faceAuthID) external view returns (bool) {
+    return keccak256(abi.encodePacked(faceAuth[user])) == keccak256(abi.encodePacked(faceAuthID));
+  }
+
 
   // Add a file URL for the user
   function addFile(address user, string memory url) external {

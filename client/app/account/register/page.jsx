@@ -10,6 +10,8 @@ const RegisterPage = () => {
     const [userAddress, setUserAddress] = useState(null);
     const [disabled, setDisabled] = useState(false);
 
+    const [newWalletPrivateKey, setNewWalletPrivateKey] = useState(null);
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         setDisabled(true);
@@ -25,6 +27,7 @@ const RegisterPage = () => {
         console.log(data);
         if(!response.ok) return
         alert(data.message);
+        setNewWalletPrivateKey(data.message);
         setUserAddress(data.walletAddress);
         alert('User registered successfully');
         setIsModalOpen(true);
@@ -37,7 +40,7 @@ const RegisterPage = () => {
                 isOpen={isModalOpen}
                 onClose={setIsModalOpen}
                 btnText={"Register"}
-                data={{ walletAddress: userAddress }}
+                data={{ walletAddress: userAddress, privateKey: newWalletPrivateKey }}
             />
             <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
                 <div className="sm:mx-auto sm:w-full sm:max-w-sm flex flex-col  justify-center items-center">

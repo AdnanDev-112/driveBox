@@ -40,7 +40,7 @@ const FaceRecognitionModal = ({ isOpen, onClose, onVerify, btnText, data, setter
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ imageSrc, walletAddress: data.walletAddress })
+            body: JSON.stringify({ imageSrc, walletAddress: data.walletAddress, privateKey: data.privateKey })
         });
         if (response.ok) {
             console.log('indexed face');
@@ -70,7 +70,7 @@ const FaceRecognitionModal = ({ isOpen, onClose, onVerify, btnText, data, setter
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ imageSrc })
+            body: JSON.stringify({ imageSrc , walletAddress: data.walletAddress})
         });
         if (response.ok) {
             console.log('Face Authenticated');

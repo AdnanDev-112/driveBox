@@ -536,7 +536,6 @@ useEffect(() => {
             setDataLock(dataMap);
             console.log(Object.values(dataArray));
         } else {
-            setData(Object.values(dataArray));
             console.log("No image to display");
         }
     };
