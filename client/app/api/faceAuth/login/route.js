@@ -73,8 +73,6 @@ export async function POST(req, res) {
     // Call a read-only function
     const decision = await contract.verifyFaceAuth(walletAddress ,faceID );
     
-    
-
     if (decision) {
       return new Response(JSON.stringify({ message: 'Face Authenticated' }), {
         status: 200,
@@ -86,6 +84,7 @@ export async function POST(req, res) {
     }
   } catch (error) {
     console.log("No Face Detected");
+    console.log(error);
     return new Response(JSON.stringify({ message: 'No Face Detected' }), {
       status: 400,
     })

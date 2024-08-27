@@ -1,74 +1,5 @@
-// import {useState} from 'react'
-// import axios from "axios";
 
-
-// const UploadFileIpfs = ({ contract, account, provider }) => {
-//     const [file, setFile] = useState(null);
-//     const [fileName, setFileName] = useState("No image selected");
-//     const handleSubmit = async (e) => {
-//       e.preventDefault();
-//       if (file) {
-//         try {
-//           const formData = new FormData();
-//           formData.append("file", file);
-//           const resFile = await axios({
-//             method: "post",
-//             url: "https://api.pinata.cloud/pinning/pinFileToIPFS",
-//             data: formData,
-//             headers: {
-//               pinata_api_key: process.env.NEXT_PUBLIC_PINATA_API,
-//               pinata_secret_api_key: process.env.NEXT_PUBLIC_PINATA_API_SECRET,
-//               "Content-Type": "multipart/form-data",
-//             },
-//           });
-//           const ImgHash = `https://gateway.pinata.cloud/ipfs/${resFile.data.IpfsHash}`;
-//           await contract.add(account,ImgHash);
-//           console.log(ImgHash);
-//           alert("Successfully Image Uploaded");
-//           setFileName("No image selected");
-//           setFile(null);
-//         } catch (e) {
-//           alert("Unable to upload image to Pinata");
-//         }
-//       }
-//       setFileName("No image selected");
-//       setFile(null);
-//     };
-//     const retrieveFile = (e) => {
-//       const data = e.target.files[0]; //files array of files object
-//       // console.log(data);
-//       const reader = new window.FileReader();
-//       reader.readAsArrayBuffer(data);
-//       reader.onloadend = () => {
-//         setFile(e.target.files[0]);
-//       };
-//       setFileName(e.target.files[0].name);
-//       e.preventDefault();
-//     };
-//     return (
-//       <div className="top ">
-//         <form className="form flex-col" onSubmit={handleSubmit}>
-//           <label htmlFor="file-upload" className="choose">
-//             Choose Image
-//           </label>
-//           <input
-//             disabled={!account}
-//             type="file"
-//             id="file-upload"
-//             name="data"
-//             onChange={retrieveFile}
-//           />
-//           <span className="textArea">Image: {fileName}</span>
-//           <button type="submit" className="upload bg-red-600" disabled={!file}>
-//             Upload File
-//           </button>
-//         </form>
-//       </div>
-//     );
-// }
-
-// export default UploadFileIpfs ;
-
+// Code to Encrypt  the file :
 import { useState } from 'react';
 import axios from "axios";
 
@@ -77,13 +8,34 @@ const UploadFileIpfs = ({ contract, account, provider, isFileUploadModalOpen, se
   const [fileName, setFileName] = useState("No image selected");
   const [isUploading, setIsUploading] = useState(false);
 
+  // Encryption function using Web Crypto API
+  const encryptFile = async (file) => {
+    const algorithm = { name: "AES-CBC", length: 256 };
+    const key = await crypto.subtle.generateKey(algorithm, true, ["encrypt", "decrypt"]);
+    const iv = crypto.getRandomValues(new Uint8Array(16)); // Initialization vector
+
+    const fileData = await file.arrayBuffer();
+    const encryptedData = await crypto.subtle.encrypt({ ...algorithm, iv }, key, fileData);
+
+    return { encryptedData, key, iv };
+  };
+
   const handleSubmit = async (e) => {
     setIsUploading(true);
     e.preventDefault();
     if (file) {
       try {
+        // Encrypt the file before uploading
+        const { encryptedData, key, iv } = await encryptFile(file);
+
+        // Convert encrypted data to a Blob
+        const encryptedBlob = new Blob([new Uint8Array(encryptedData)], { type: file.type });
+
+        // Create a FormData object and append the encrypted file
         const formData = new FormData();
-        formData.append("file", file);
+        formData.append("file", encryptedBlob, fileName);
+
+        // Upload the encrypted file to IPFS
         const resFile = await axios({
           method: "post",
           url: "https://api.pinata.cloud/pinning/pinFileToIPFS",
@@ -94,18 +46,27 @@ const UploadFileIpfs = ({ contract, account, provider, isFileUploadModalOpen, se
             "Content-Type": "multipart/form-data",
           },
         });
-        const ImgHash = `https://gateway.pinata.cloud/ipfs/${resFile.data.IpfsHash}`;
-        await contract.addFile(account, ImgHash);
-        // await contract.addFile( ImgHash);
+
+        // const ImgHash = `https://gateway.pinata.cloud/ipfs/${resFile.data.IpfsHash}`;
+        const fileCid = resFile.data.IpfsHash;
+
+        // Convert the key and iv to hex strings to store them
+        const keyHex = Buffer.from(await crypto.subtle.exportKey('raw', key)).toString('hex');
+        const ivHex = Buffer.from(iv).toString('hex');
+
+        // Store the CID, key, and IV on the blockchain (this can be encrypted or managed securely)
+        await contract.addFile(account,fileName,fileCid.toString(),keyHex.toString(),iv.toString());
+        console.log(keyHex,"KeyHex");
+        console.log(ivHex,"IVHex");
+        
 
         setFileUploadModalOpen(false); // Close modal on success
         setIsUploading(false);
         window.location.reload();
-
-
       } catch (error) {
+        console.log(error);
+        
         setIsUploading(false);
-
         alert("Failed to upload image to IPFS");
       }
     }
@@ -115,6 +76,8 @@ const UploadFileIpfs = ({ contract, account, provider, isFileUploadModalOpen, se
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
+      console.log("file Name is " , selectedFile.name);
+      
       setFileName(selectedFile.name);
     }
   };
