@@ -1,15 +1,21 @@
 'use client';
 import { useState , useEffect } from 'react';
 
-const ShareModal = ({ isOpen, onClose, fileUrl,contract,ownerAddress }) => {
+const ShareModal = ({ isOpen, onClose, fileData,contract,ownerAddress }) => {
+    if (!fileData) return null;
+
     const [otherUserAddress, setOthUserAdd] = useState('');
     const [sharedUsers, setSharedUsers] = useState([
      ]);
+    const fileName = fileData.fileName;
+    const fileCID = fileData.fileCID;
+
+
 
     const handleShare = async () => {
         let dataArray;
         try {
-            dataArray = await contract.allowAccess(ownerAddress, fileUrl, otherUserAddress);
+            dataArray = await contract.allowAccess(ownerAddress,fileCID, otherUserAddress);
             setSharedUsers([...sharedUsers, otherUserAddress]);
             alert('File shared successfully');
         } catch (e) {
@@ -26,7 +32,7 @@ useEffect(() => {
     // Hypothetical logic to fetch shared users list on component mount or when fileUrl changes
     const fetchSharedUsers = async () => {
         try {
-            const sharedUsersList = await contract.shareAccessList(ownerAddress, fileUrl);
+            const sharedUsersList = await contract.shareAccessList(ownerAddress, fileCID);
             setSharedUsers(sharedUsersList);
         } catch (e) {
             console.error("Failed to fetch shared users:", e.message);
@@ -36,7 +42,7 @@ useEffect(() => {
     if (isOpen) { // Assuming we only want to fetch when the modal is open
         fetchSharedUsers();
     }
-    console.log("useEffect called with isOpen, fileUrl:", isOpen, fileUrl);
+    console.log("useEffect called with isOpen, fileUrl:", isOpen, fileCID);
 }, [isOpen]); // Dependencies: isOpen, fileUrl, and contract
 
 // Debugging step: Ensure useEffect is called
@@ -48,7 +54,7 @@ useEffect(() => {
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg shadow-lg w-1/3">
                 <div className="p-5 border-b">
-                    <h2 className="text-xl font-semibold">Share "{fileUrl}"</h2>
+                    <h2 className="text-xl font-semibold">Share "{fileName}"</h2>
                 </div>
                 <div className="p-5">
                     <input 

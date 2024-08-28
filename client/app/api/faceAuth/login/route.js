@@ -52,12 +52,14 @@ const faceAuthLogin = async (image) => {
 };
 
 export async function POST(req, res) {
-  const { imageSrc ,walletAddress } = await req.json();
+  const { imageSrc, walletAddress } = await req.json();
   try {
     const faces = await faceAuthLogin(imageSrc);
     console.log(faces, "Faces");
-    const faceID = faces[0].Face.FaceId;
-
+    // const faceID = faces[0].Face.FaceId;
+    // Sort faces by similarity score in descending order
+    faces.sort((a, b) => b.Similarity - a.Similarity);
+    let verified = false;
     // Blockchain Logic :
 
     // Connect to a public Ethereum node
@@ -71,9 +73,18 @@ export async function POST(req, res) {
     const contract = new ethers.Contract(contractAddress, contractABI, provider);
 
     // Call a read-only function
-    const decision = await contract.verifyFaceAuth(walletAddress ,faceID );
-    
-    if (decision) {
+    // const decision = await contract.verifyFaceAuth(walletAddress, faceID);
+    for (let face of faces) {
+      const faceID = face.Face.FaceId;
+      const decision = await contract.verifyFaceAuth(walletAddress, faceID);
+      if (decision) {
+        verified = true;
+        console.log("User authenticated successfully");
+        break;
+      }
+    }
+
+    if (verified) {
       return new Response(JSON.stringify({ message: 'Face Authenticated' }), {
         status: 200,
       })

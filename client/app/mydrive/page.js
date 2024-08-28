@@ -27,7 +27,16 @@ const MyDriveHomePage = () => {
 
     // Track Active Component
     const [activeComponent, setActiveComponent] = useState(0);
+    // Function to reset states
+    const resetStates = () => {
+        setData([]);
+        setFileEncryptionData(new Map());
+        setFileDecryptedData(new Map());
+        setFileCIDDataMap(new Map());
+        setDataLock(new Map());
+    };
     const handleComponentSwitch = (number) => {
+        resetStates();
         setActiveComponent(number);
         if (number == 0) {
             getdata(contract, account);
@@ -107,7 +116,7 @@ const MyDriveHomePage = () => {
             let tempArray = Object.values(dataArray);
             const finalDataArray = [];
 
-            const dataMap = new Map();
+            const lockMap = new Map();
             const dataEncyrptionMap = new Map();
             const dataDecyrptionMap = new Map();
             const fileData = new Map();
@@ -120,7 +129,7 @@ const MyDriveHomePage = () => {
                     fileIV: item[3]
                 }
                 fileData.set(itemStructure.fileCID, { ...itemStructure });
-                dataMap.set(itemStructure.fileHex, true);
+                lockMap.set(itemStructure.fileHex, true);
                 dataEncyrptionMap.set(itemStructure.fileHex, { fileIV: itemStructure.fileIV, fileCID: itemStructure.fileCID });
                 finalDataArray.push(itemStructure);
                 dataDecyrptionMap.set(itemStructure.fileHex, false);
@@ -129,14 +138,38 @@ const MyDriveHomePage = () => {
             setData(finalDataArray);
             setFileDecryptedData(dataDecyrptionMap);
             setFileCIDDataMap(fileData);
-            console.log(dataMap);
+            console.log(lockMap);
 
-            setDataLock(dataMap);
+            setDataLock(lockMap);
             console.log(Object.values(dataArray));
         } else {
             console.log("No image to display");
         }
     };
+    // const getSharedData = async (contract, account) => {
+    //     let dataArray;
+    //     try {
+    //         dataArray = await contract.sharedWithMe(account);
+    //         console.log(dataArray);
+    //     } catch (e) {
+    //         console.log(e.message);
+    //     }
+    //     const isEmpty = dataArray ? Object.keys(dataArray).length === 0 : true;
+
+    //     if (!isEmpty) {
+    //         let tempArray = Object.values(dataArray);
+    //         setData(tempArray);
+    //         const lockMap = new Map();
+    //         tempArray.forEach(item => {
+    //             lockMap.set(item, true);
+    //         });
+    //         setDataLock(lockMap);
+    //         console.log(Object.values(dataArray));
+    //     } else {
+    //         setData(Object.values(dataArray));
+    //         console.log("No Items Shared with this User");
+    //     }
+    // };
     const getSharedData = async (contract, account) => {
         let dataArray;
         try {
@@ -145,22 +178,46 @@ const MyDriveHomePage = () => {
         } catch (e) {
             console.log(e.message);
         }
+
         const isEmpty = dataArray ? Object.keys(dataArray).length === 0 : true;
 
         if (!isEmpty) {
             let tempArray = Object.values(dataArray);
-            setData(tempArray);
-            const dataMap = new Map();
+            const finalDataArray = [];
+
+            const lockMap = new Map();
+            const dataEncyrptionMap = new Map();
+            const dataDecyrptionMap = new Map();
+            const fileData = new Map();
+
             tempArray.forEach(item => {
-                dataMap.set(item, true);
+                const itemStructure = {
+                    fileName: item[0],
+                    fileCID: item[1],
+                    fileHex: item[2],
+                    fileIV: item[3]
+                }
+                fileData.set(itemStructure.fileCID, { ...itemStructure });
+                lockMap.set(itemStructure.fileHex, true);
+                dataEncyrptionMap.set(itemStructure.fileHex, { fileIV: itemStructure.fileIV, fileCID: itemStructure.fileCID });
+                finalDataArray.push(itemStructure);
+                dataDecyrptionMap.set(itemStructure.fileHex, false);
             });
-            setDataLock(dataMap);
+
+            setFileEncryptionData(dataEncyrptionMap);
+            setData(finalDataArray);
+            setFileDecryptedData(dataDecyrptionMap);
+            setFileCIDDataMap(fileData);
+            console.log(lockMap);
+
+            setDataLock(lockMap);
             console.log(Object.values(dataArray));
         } else {
-            setData(Object.values(dataArray));
+            setData([]);
             console.log("No Items Shared with this User");
         }
     };
+
 
     const handleTrashClick = async (cid) => {
         try {
@@ -286,12 +343,48 @@ const MyDriveHomePage = () => {
                     {/* Files and Folders */}
                     <div className="flex-1 p-5 overflow-auto">
                         <div className="grid grid-cols-4 gap-4">
-                            {data.length > 0 && activeComponent == 0 ? 
-                            data.filter(item => item.fileName.toLowerCase().includes(searchQuery))
-                            .map((item, index) => (
+                            {data.length > 0 && activeComponent == 0 ?
+                                data.filter(item => item.fileName.toLowerCase().includes(searchQuery))
+                                    .map((item, index) => (
+                                        <div className="bg-white p-5 shadow rounded-lg flex flex-col items-center relative" key={index}>
+                                            <div className="relative w-full" style={{ paddingBottom: '75%' }}> {/* 4:3 Aspect Ratio */}
+                                                {!dataLock.get(item.fileHex) && <Image objectFit="cover" layout="fill" src={fileDecryptedData.get(item.fileHex)} alt='File' className={`absolute inset-0 ${dataLock.get(item.fileHex) ? 'filter blur-lg' : ''}`} />}
+                                                {dataLock.get(item.fileHex) && (
+                                                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                                                        <LockClosedIcon
+                                                            className='h-10 w-10 text-white cursor-pointer'
+                                                            onClick={() => handleFileUnlock(item.fileHex)}
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <p>{item.fileName}</p>
+                                            </div>
+                                            {dataLock.get(item.fileHex) != true ? (
+                                                <>
+                                                    <div className="mt-2 w-full flex justify-between">
+                                                        <div className='flex-1 flex justify-center'>
+                                                            <ShareIcon className='h-10 w-10 text-blue-400 cursor-pointer' onClick={() => handleShareClick(item)} />
+                                                        </div>
+                                                        <div className='flex-1 flex justify-center'>
+                                                            <ArrowDownTrayIcon className='h-10 w-10 text-blue-400 cursor-pointer' onClick={() => handleFileDownload(item.fileCID, item.fileName)} />
+                                                        </div>
+                                                        <div className='flex-1 flex justify-center'>
+                                                            <TrashIcon className='h-10 w-10 text-red-400 cursor-pointer' onClick={() => handleTrashClick(item.fileCID)} />
+                                                        </div>
+                                                    </div>
+                                                </>
+                                            ) : (<></>)}
+
+
+                                        </div>
+                                    )) : (activeComponent == 0 && data.length == 0) && <div className="text-center text-2xl text-gray-500">No files found</div>}
+                            {data.length > 0 && activeComponent == 1 ? data.map((item, index) => (
                                 <div className="bg-white p-5 shadow rounded-lg flex flex-col items-center relative" key={index}>
+                                    {/* <Image src={item} width={200} height={200} alt='File' className="mt-2" /> */}
                                     <div className="relative w-full" style={{ paddingBottom: '75%' }}> {/* 4:3 Aspect Ratio */}
-                                        {!dataLock.get(item.fileHex) && <Image objectFit="cover" layout="fill" src={fileDecryptedData.get(item.fileHex)} alt='File' className={`absolute inset-0 ${dataLock.get(item) ? 'filter blur-lg' : ''}`} />}
+                                        {!dataLock.get(item.fileHex) && <Image objectFit="cover" layout="fill" src={fileDecryptedData.get(item.fileHex)} alt='File' className={`absolute inset-0 ${dataLock.get(item.fileHex) ? 'filter blur-lg' : ''}`} />}
                                         {dataLock.get(item.fileHex) && (
                                             <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                                                 <LockClosedIcon
@@ -304,39 +397,6 @@ const MyDriveHomePage = () => {
                                     <div>
                                         <p>{item.fileName}</p>
                                     </div>
-                                    {dataLock.get(item.fileHex) != true ? (
-                                        <>
-                                            <div className="mt-2 w-full flex justify-between">
-                                                <div className='flex-1 flex justify-center'>
-                                                    <ShareIcon className='h-10 w-10 text-blue-400 cursor-pointer' onClick={() => handleShareClick(item)} />
-                                                </div>
-                                                <div className='flex-1 flex justify-center'>
-                                                    <ArrowDownTrayIcon className='h-10 w-10 text-blue-400 cursor-pointer' onClick={() => handleFileDownload(item.fileCID, item.fileName)} />
-                                                </div>
-                                                <div className='flex-1 flex justify-center'>
-                                                    <TrashIcon className='h-10 w-10 text-red-400 cursor-pointer' onClick={() => handleTrashClick(item.fileCID)} />
-                                                </div>
-                                            </div>
-                                        </>
-                                    ) : (<></>)}
-
-
-                                </div>
-                            )) : (activeComponent == 0 && data.length == 0) && <div className="text-center text-2xl text-gray-500">No files found</div>}
-                            {data.length > 0 && activeComponent == 1 ? data.map((item, index) => (
-                                <div className="bg-white p-5 shadow rounded-lg flex flex-col items-center relative" key={index}>
-                                    {/* <Image src={item} width={200} height={200} alt='File' className="mt-2" /> */}
-                                    <div className="relative w-full" style={{ paddingBottom: '75%' }}> {/* 4:3 Aspect Ratio */}
-                                        <Image objectFit="cover" layout="fill" src={item} alt='File' className={`absolute inset-0 ${dataLock.get(item) ? 'filter blur-lg' : ''}`} />
-                                        {dataLock.get(item) && (
-                                            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                                                <LockClosedIcon
-                                                    className='h-10 w-10 text-white cursor-pointer'
-                                                    onClick={() => handleFileUnlock(item)}
-                                                />
-                                            </div>
-                                        )}
-                                    </div>
                                 </div>
                             )) : (activeComponent == 1 && data.length == 0) && <div className="text-center text-2xl text-gray-500">No files found</div>}
                         </div>
@@ -346,7 +406,7 @@ const MyDriveHomePage = () => {
                 <ShareFileModal
                     isOpen={isShareModalOpen}
                     onClose={() => setShareModalOpen(false)}
-                    fileUrl={currentFile}
+                    fileData={currentFile && currentFile}
                     contract={contract}
                     ownerAddress={account}
                 />
