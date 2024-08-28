@@ -9,7 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@aws-amplify/ui-react-liveness": "^3.1.4",
+    "@aws-sdk/client-rekognition": "^3.637.0",
     "@heroicons/react": "^2.1.5",
+    "aws-amplify": "^6.5.3",
     "aws-sdk": "^2.1664.0",
     "axios": "^1.7.2",
     "crypto": "^1.0.1",

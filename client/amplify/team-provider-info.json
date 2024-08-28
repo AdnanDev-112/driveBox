@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-faceliveness-dev-eb329-authRole",
+      "UnauthRoleArn": "arn:aws:iam::533267389165:role/amplify-faceliveness-dev-eb329-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::533267389165:role/amplify-faceliveness-dev-eb329-authRole",
+      "Region": "eu-west-1",
+      "DeploymentBucketName": "amplify-faceliveness-dev-eb329-deployment",
+      "UnauthRoleName": "amplify-faceliveness-dev-eb329-unauthRole",
+      "StackName": "amplify-faceliveness-dev-eb329",
+      "StackId": "arn:aws:cloudformation:eu-west-1:533267389165:stack/amplify-faceliveness-dev-eb329/71ac0fc0-6552-11ef-9be1-02bcd9b481f9",
+      "AmplifyAppId": "d2qcmsqx925hnl"
+    },
+    "categories": {
+      "auth": {
+        "faceliveness71413ab671413ab6": {}
+      }
+    }
+  }
+}

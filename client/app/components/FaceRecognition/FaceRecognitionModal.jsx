@@ -1,11 +1,12 @@
 // FaceRecognitionModal.jsx
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState,useEffect } from 'react';
 import Webcam from 'react-webcam';
 // import * as AWS from 'aws-sdk';
 // import Rekognition from 'aws-sdk/clients/rekognition';
 // import S3 from 'aws-sdk/clients/s3';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import FaceLivenessChecker from './FaceLivenessChecker/FaceLivenessChecker';
 
 
 // Function to Decrypt the Encrypted Data
@@ -42,10 +43,13 @@ const FaceRecognitionModal = ({ isOpen, onClose, onVerify, btnText, data, additi
     const webcamRef = useRef(null);
     const [btnDisabled, setBtnDisabled] = useState(false);
 
-    const capture = () => {
-        const imageSrc = webcamRef.current.getScreenshot();
+    const afterLivenessChecker = (imageSrc) => {
+        // const imageSrc = webcamRef.current.getScreenshot();
         // onVerify(imageSrc);
         // btnText === "Register" ? registerNewUser(imageSrc) : loginUser(imageSrc);
+        console.log("Initialed After Checker")
+        console.log("imageSrc", imageSrc);
+
         switch (btnText) {
             case "Register":
                 registerNewUser(imageSrc);
@@ -61,7 +65,6 @@ const FaceRecognitionModal = ({ isOpen, onClose, onVerify, btnText, data, additi
                 break;
         }
     };
-
     const registerNewUser = async (imageSrc) => {
         console.log(imageSrc);
         setBtnDisabled(true);
@@ -221,28 +224,30 @@ const FaceRecognitionModal = ({ isOpen, onClose, onVerify, btnText, data, additi
 
     if (!isOpen) return null;
 
-
+    
+    
+    
 
     return (
         <>
             <ToastContainer />
-
             <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-10">
                 <div className="bg-white p-6 rounded-lg shadow-lg">
                     <h2 className="text-2xl mb-4">Face Recognition</h2>
-                    <Webcam
+                    {/* <Webcam
                         audio={false}
                         ref={webcamRef}
                         screenshotFormat="image/jpeg"
-                        className="mb-4"
-                    />
+                        className="mb-4 hidden"
+                    /> */}
+                    <FaceLivenessChecker afterLivenessChecker={afterLivenessChecker} />
                     {!btnDisabled && <>
-                        <button
+                        {/* <button
                             onClick={capture}
                             className="bg-blue-500 text-white px-4 py-2 rounded-full"
                         >
                             {btnText}
-                        </button>
+                        </button> */}
                         <button
                             onClick={() => { onClose(false) }}
                             className="bg-red-500 text-white px-4 py-2 rounded-full ml-4"

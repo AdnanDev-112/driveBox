@@ -151,7 +151,6 @@
 //     }
 // }
 
-
 pragma solidity >=0.8.9;
 
 contract UploadFile {
@@ -170,10 +169,12 @@ contract UploadFile {
 
     mapping(address => string) private faceAuth;
     mapping(address => File[]) private userFiles;
-    mapping(address => mapping(string => mapping(address => bool))) private fileAccess;
+    mapping(address => mapping(string => mapping(address => bool)))
+        private fileAccess;
     mapping(address => mapping(string => address[])) private fileAccessUsers;
     mapping(address => Access[]) private accessList;
-    mapping(address => mapping(address => mapping(string => bool))) private previousFileAccess;
+    mapping(address => mapping(address => mapping(string => bool)))
+        private previousFileAccess;
 
     function addFaceAuth(address user, string memory faceAuthID) external {
         faceAuth[user] = faceAuthID;
@@ -244,28 +245,66 @@ contract UploadFile {
     }
 
     // Disallow access to a specific file for a user
+    // function disallowAccess(
+    //     address owner,
+    //     string memory cid,
+    //     address user
+    // ) public {
+    //     fileAccess[owner][cid][user] = false;
+
+    //     for (uint i = 0; i < accessList[user].length; i++) {
+    //         if (
+    //             accessList[user][i].user == owner &&
+    //             keccak256(abi.encodePacked(accessList[user][i].cid)) ==
+    //             keccak256(abi.encodePacked(cid))
+    //         ) {
+    //             accessList[user][i].access = false;
+    //         }
+    //     }
+    // }
+    // Disallow access to a specific file for a user
     function disallowAccess(
         address owner,
         string memory cid,
         address user
     ) public {
+        // Set the file access to false
         fileAccess[owner][cid][user] = false;
 
+        // Remove the user from fileAccessUsers[owner][cid]
+        for (uint i = 0; i < fileAccessUsers[owner][cid].length; i++) {
+            if (fileAccessUsers[owner][cid][i] == user) {
+                // Remove the user by swapping with the last element and then popping the array
+                fileAccessUsers[owner][cid][i] = fileAccessUsers[owner][cid][
+                    fileAccessUsers[owner][cid].length - 1
+                ];
+                fileAccessUsers[owner][cid].pop();
+                break; // Exit the loop once the user is removed
+            }
+        }
+
+        // Update accessList[user] by finding and removing the corresponding access entry
         for (uint i = 0; i < accessList[user].length; i++) {
             if (
                 accessList[user][i].user == owner &&
                 keccak256(abi.encodePacked(accessList[user][i].cid)) ==
                 keccak256(abi.encodePacked(cid))
             ) {
-                accessList[user][i].access = false;
+                // Remove the access entry by swapping with the last element and then popping the array
+                accessList[user][i] = accessList[user][
+                    accessList[user].length - 1
+                ];
+                accessList[user].pop();
+                break; // Exit the loop once the entry is removed
             }
         }
+
+        // Remove the entry from previousFileAccess
+        previousFileAccess[user][owner][cid] = false;
     }
 
     // Display the user's files
-    function displayFiles(
-        address user
-    ) external view returns (File[] memory) {
+    function displayFiles(address user) external view returns (File[] memory) {
         return userFiles[user];
     }
 
@@ -292,12 +331,21 @@ contract UploadFile {
                 string memory cid = accessList[caller][i].cid;
 
                 // Find the file details using the CID
-                for (uint j = 0; j < userFiles[accessList[caller][i].user].length; j++) {
+                for (
+                    uint j = 0;
+                    j < userFiles[accessList[caller][i].user].length;
+                    j++
+                ) {
                     if (
-                        keccak256(abi.encodePacked(userFiles[accessList[caller][i].user][j].cid)) ==
-                        keccak256(abi.encodePacked(cid))
+                        keccak256(
+                            abi.encodePacked(
+                                userFiles[accessList[caller][i].user][j].cid
+                            )
+                        ) == keccak256(abi.encodePacked(cid))
                     ) {
-                        sharedFiles[index] = userFiles[accessList[caller][i].user][j];
+                        sharedFiles[index] = userFiles[
+                            accessList[caller][i].user
+                        ][j];
                         index++;
                         break;
                     }

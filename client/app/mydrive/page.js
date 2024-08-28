@@ -8,7 +8,7 @@ import UserNavbar from '../components/User-Navbar/UserNavbar';
 import UploadFileIpfs from '../components/Upload-Ipfs-Modal/UploadFileIpfs';
 import ShareFileModal from '../components/ShareFileModal/ShareFileModal'; // Import ShareModal
 import ProtectedComponent from '@/utils/protectedComponent';
-import { DocumentTextIcon, FolderOpenIcon, MagnifyingGlassIcon, TrashIcon, ShareIcon, LockClosedIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'; // Added ShareIcon
+import { DocumentTextIcon, FolderOpenIcon, MagnifyingGlassIcon, TrashIcon, ShareIcon, LockClosedIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'; 
 import FaceRecognitionModal from '../components/FaceRecognition/FaceRecognitionModal';
 
 const MyDriveHomePage = () => {
@@ -146,30 +146,6 @@ const MyDriveHomePage = () => {
             console.log("No image to display");
         }
     };
-    // const getSharedData = async (contract, account) => {
-    //     let dataArray;
-    //     try {
-    //         dataArray = await contract.sharedWithMe(account);
-    //         console.log(dataArray);
-    //     } catch (e) {
-    //         console.log(e.message);
-    //     }
-    //     const isEmpty = dataArray ? Object.keys(dataArray).length === 0 : true;
-
-    //     if (!isEmpty) {
-    //         let tempArray = Object.values(dataArray);
-    //         setData(tempArray);
-    //         const lockMap = new Map();
-    //         tempArray.forEach(item => {
-    //             lockMap.set(item, true);
-    //         });
-    //         setDataLock(lockMap);
-    //         console.log(Object.values(dataArray));
-    //     } else {
-    //         setData(Object.values(dataArray));
-    //         console.log("No Items Shared with this User");
-    //     }
-    // };
     const getSharedData = async (contract, account) => {
         let dataArray;
         try {
@@ -334,8 +310,8 @@ const MyDriveHomePage = () => {
                             />
 
                         </div>
-                        <div className="ml-5 cursor-pointer" onClick={toggleDropdown}>
-                            <Image src={"/user.png"} width={50} alt='User Icon' height={50} className='' />
+                        <div className="ml-5" onClick={toggleDropdown}>
+                            <Image src={"/user.png"} width={50} alt='User Icon' height={50} className='cursor-pointer' />
                             {isDropdownOpen && <UserNavbar userAddress={account} />}
                         </div>
                     </div>
@@ -380,7 +356,9 @@ const MyDriveHomePage = () => {
 
                                         </div>
                                     )) : (activeComponent == 0 && data.length == 0) && <div className="text-center text-2xl text-gray-500">No files found</div>}
-                            {data.length > 0 && activeComponent == 1 ? data.map((item, index) => (
+                            {data.length > 0 && activeComponent == 1 ? 
+                            data.filter(item => item.fileName.toLowerCase().includes(searchQuery))
+                            .map((item, index) => (
                                 <div className="bg-white p-5 shadow rounded-lg flex flex-col items-center relative" key={index}>
                                     {/* <Image src={item} width={200} height={200} alt='File' className="mt-2" /> */}
                                     <div className="relative w-full" style={{ paddingBottom: '75%' }}> {/* 4:3 Aspect Ratio */}
