@@ -6,8 +6,8 @@ import Image from 'next/image';
 import Upload from "../components/artifacts/contracts/UploadFile.sol/UploadFile.json";
 import UserNavbar from '../components/User-Navbar/UserNavbar';
 import UploadFileIpfs from '../components/Upload-Ipfs-Modal/UploadFileIpfs';
-import ShareFileModal from '../components/ShareFileModal/ShareFileModal'; // Import ShareModal
-import ProtectedComponent from '@/utils/protectedComponent';
+import ShareFileModal from '../components/ShareFileModal/ShareFileModal'; 
+import ProtectedComponent from '@/utilities/protectedComponent';
 import { DocumentTextIcon, FolderOpenIcon, MagnifyingGlassIcon, TrashIcon, ShareIcon, LockClosedIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'; 
 import FaceRecognitionModal from '../components/FaceRecognition/FaceRecognitionModal';
 
@@ -66,11 +66,6 @@ const MyDriveHomePage = () => {
     // Search Functionality 
     const [searchQuery, setSearchQuery] = useState("");
 
-
-
-
-
-
     useEffect(() => {
         // Ensure `ethereum` is available in the window object
         if (window.ethereum !== null) {
@@ -87,12 +82,9 @@ const MyDriveHomePage = () => {
                 const signer = await provider.getSigner();
 
                 const address = await signer.getAddress();
-                console.log(address);
                 setAccount(address);
-
                 const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
                 const contract = new ethers.Contract(contractAddress, Upload.abi, signer);
-                console.log(contract, address);
                 getdata(contract, address);
                 setContract(contract);
                 setProvider(provider);
@@ -106,8 +98,7 @@ const MyDriveHomePage = () => {
     const getdata = async (contract, account) => {
         let dataArray;
         try {
-            dataArray = await contract.displayFiles(account);
-            console.log(dataArray);
+            dataArray = await contract.getMyFiles(account);
         } catch (e) {
             console.log(e.message);
         }
@@ -138,10 +129,7 @@ const MyDriveHomePage = () => {
             setData(finalDataArray);
             setFileDecryptedData(dataDecyrptionMap);
             setFileCIDDataMap(fileData);
-            console.log(lockMap);
-
             setDataLock(lockMap);
-            console.log(Object.values(dataArray));
         } else {
             console.log("No image to display");
         }
@@ -150,7 +138,6 @@ const MyDriveHomePage = () => {
         let dataArray;
         try {
             dataArray = await contract.sharedWithMe(account);
-            console.log(dataArray);
         } catch (e) {
             console.log(e.message);
         }
@@ -184,10 +171,7 @@ const MyDriveHomePage = () => {
             setData(finalDataArray);
             setFileDecryptedData(dataDecyrptionMap);
             setFileCIDDataMap(fileData);
-            console.log(lockMap);
-
             setDataLock(lockMap);
-            console.log(Object.values(dataArray));
         } else {
             setData([]);
             console.log("No Items Shared with this User");
@@ -205,7 +189,6 @@ const MyDriveHomePage = () => {
             });
             const tx = await contract.removeFile(account, cid);
             await tx.wait();
-            console.log('URL removed successfully');
             window.location.reload();
         } catch (error) {
             console.error('Error removing URL:', error);
@@ -213,7 +196,6 @@ const MyDriveHomePage = () => {
     };
 
     const handleShareClick = (file) => {
-        console.log(file);
         setCurrentFile(file);
         setShareModalOpen(true);
     };

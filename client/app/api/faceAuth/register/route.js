@@ -1,16 +1,10 @@
-// import { ethers } from 'ethers';
 import connectDB from '@/database/utils/connectDB';
 import User from '@/database/models/schema';
-
 import * as AWS from 'aws-sdk';
 import Rekognition from 'aws-sdk/clients/rekognition';
-import S3 from 'aws-sdk/clients/s3';
 import { ethers } from 'ethers';
 import Upload from "../../../components/artifacts/contracts/UploadFile.sol/UploadFile.json";
-
-
 connectDB();
-
 
 //   AWS Configs 
 if (process.env.NEXT_PUBLIC_PB_ACCESS_KEY_ID) {
@@ -21,8 +15,7 @@ if (process.env.NEXT_PUBLIC_PB_ACCESS_KEY_ID) {
     });
 }
 
-const rekog = new Rekognition();
-const s3 = new S3();
+const rekognition = new Rekognition();
 const uuid = () => {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         const r = (Math.random() * 16) | 0,
@@ -37,8 +30,8 @@ const indexFace = async (image,walletAddress,WalletPrivateKey) => {
         const imgBuffer = Buffer.from(base64Img, 'base64');
         // create a unique id for the image
         const imageId = uuid();
-        // Add face to rekognition collection
-        const newIndexedFace = await rekog
+        // Add face to rekognitionnition collection
+        const newIndexedFace = await rekognition
             .indexFaces({
                 CollectionId: 'compare-face-dev',
                 ExternalImageId: imageId,
@@ -47,7 +40,6 @@ const indexFace = async (image,walletAddress,WalletPrivateKey) => {
                 },
             })
             .promise();
-        // console.log(JSON.stringify(newIndexedFace, null, 2));
         const faceAuthID = newIndexedFace.FaceRecords[0].Face.FaceId;
 
         const simulatedWallet = new ethers.Wallet(WalletPrivateKey, ethers.getDefaultProvider('http://localhost:8545'));
@@ -76,7 +68,6 @@ export async function POST(req, res) {
         // Check if user already exists
         const existingUser = await User.findOne({ blockchainAddress: walletAddress });
         if (!existingUser) {
-            // return res.status(400).json({ message: 'User already exists' });
             return new Response('No User Exists', {
                 status: 400,
             })
@@ -97,9 +88,4 @@ export async function POST(req, res) {
         })
 
     }
-
-
-
-
-
 }

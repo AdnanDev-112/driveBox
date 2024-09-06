@@ -22,16 +22,13 @@ const RegisterPage = () => {
             },
             body: JSON.stringify({ email }),
         });
-        console.log(response)
         const data = await response.json();
-        console.log(data);
         if(!response.ok) return
-        alert(data.message);
+        let alertMessage = "Your Private Key is : "+data.message;
+        alert( alertMessage);
         setNewWalletPrivateKey(data.message);
         setUserAddress(data.walletAddress);
-        alert('User registered successfully');
         setIsModalOpen(true);
-        // window.location.reload();
     };
 
     return (

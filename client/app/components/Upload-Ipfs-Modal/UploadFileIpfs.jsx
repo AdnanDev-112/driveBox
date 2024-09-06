@@ -1,5 +1,3 @@
-
-// Code to Encrypt  the file :
 import { useState } from 'react';
 import axios from "axios";
 
@@ -47,7 +45,7 @@ const UploadFileIpfs = ({ contract, account, provider, isFileUploadModalOpen, se
           },
         });
 
-        // const ImgHash = `https://gateway.pinata.cloud/ipfs/${resFile.data.IpfsHash}`;
+        // const FileHash = `https://gateway.pinata.cloud/ipfs/${resFile.data.IpfsHash}`;
         const fileCid = resFile.data.IpfsHash;
 
         // Convert the key and iv to hex strings to store them
@@ -56,10 +54,6 @@ const UploadFileIpfs = ({ contract, account, provider, isFileUploadModalOpen, se
 
         // Store the CID, key, and IV on the blockchain (this can be encrypted or managed securely)
         await contract.addFile(account,fileName,fileCid.toString(),keyHex.toString(),iv.toString());
-        console.log(keyHex,"KeyHex");
-        console.log(ivHex,"IVHex");
-        
-
         setFileUploadModalOpen(false); // Close modal on success
         setIsUploading(false);
         window.location.reload();
@@ -76,8 +70,6 @@ const UploadFileIpfs = ({ contract, account, provider, isFileUploadModalOpen, se
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
-      console.log("file Name is " , selectedFile.name);
-      
       setFileName(selectedFile.name);
     }
   };

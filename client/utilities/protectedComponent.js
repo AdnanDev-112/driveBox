@@ -18,7 +18,6 @@ const ProtectedComponent = (Component) => {
             const signer = await provider.getSigner();
             const currentAddress = await signer.getAddress();
             const token = localStorage.getItem(currentAddress);
-            console.log(token, 'Token test');
             if (token != null) {
                 const response = await fetch('http://localhost:3000/api/verify', {
                     method: 'POST',
@@ -29,14 +28,11 @@ const ProtectedComponent = (Component) => {
                 });
                 let newresponse = await response.json();
                 setResponse(newresponse.message);
-                console.log(newresponse,"New Response is here");
-                console.log(response.status," Response status is here");
                 if (response.status !== 200) {
                     window.localStorage.removeItem(currentAddress);
                     router.push('/');
                 }
             }
-            
             else {
               localStorage.clear();
                 router.push('/');

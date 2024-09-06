@@ -50,19 +50,28 @@ export default function Home() {
             </Link>
           </section>
 
-          {/* Features Section */}
+          {/* /* Features Section  */}
           <section id="features" className="py-20 px-4">
             <h3 className="text-4xl font-bold text-center mb-12 text-gray-800">Features</h3>
             <div className="flex flex-wrap justify-center gap-8">
               <div className="w-80 p-6 bg-white shadow-xl rounded-lg text-center transform transition duration-300 hover:scale-105 hover:shadow-2xl">
+                <div className="flex flex-col justify-center items-center"> {/* Add 'items-center' class */}
+                  <Image src={"/face-id.png"} height={150} width={150} />
+                </div>
                 <h4 className="text-2xl font-semibold mb-4 text-blue-600">Facial Recognition</h4>
                 <p className="text-gray-600">Secure your files with advanced facial recognition technology.</p>
               </div>
               <div className="w-80 p-6 bg-white shadow-xl rounded-lg text-center transform transition duration-300 hover:scale-105 hover:shadow-2xl">
+              <div className="flex flex-col justify-center items-center"> {/* Add 'items-center' class */}
+                  <Image src={"/blockchain.png"} height={150} width={150} />
+                </div>
                 <h4 className="text-2xl font-semibold mb-4 text-blue-600">Blockchain Security</h4>
                 <p className="text-gray-600">Ensure data integrity and security with blockchain technology.</p>
               </div>
               <div className="w-80 p-6 bg-white shadow-xl rounded-lg text-center transform transition duration-300 hover:scale-105 hover:shadow-2xl">
+              <div className="flex flex-col justify-center items-center"> {/* Add 'items-center' class */}
+                  <Image src={"/access-control.png"} height={150} width={150} />
+                </div>
                 <h4 className="text-2xl font-semibold mb-4 text-blue-600">Easy Access</h4>
                 <p className="text-gray-600">Access your files from anywhere, anytime with our cloud solution.</p>
               </div>
@@ -74,14 +83,23 @@ export default function Home() {
             <h3 className="text-4xl font-bold text-center mb-12 text-gray-800">How It Works</h3>
             <div className="flex flex-wrap justify-center gap-8">
               <div className="w-80 p-6 bg-white shadow-xl rounded-lg text-center transform transition duration-300 hover:scale-105 hover:shadow-2xl">
+              <div className="flex flex-col justify-center items-center"> 
+                  <Image src={"/signup.png"} height={150} width={150} />
+                </div>
                 <h4 className="text-2xl font-semibold mb-4 text-blue-600">Step 1</h4>
                 <p className="text-gray-600">Sign up and create your account.</p>
               </div>
               <div className="w-80 p-6 bg-white shadow-xl rounded-lg text-center transform transition duration-300 hover:scale-105 hover:shadow-2xl">
+              <div className="flex flex-col justify-center items-center"> {/* Add 'items-center' class */}
+                  <Image src={"/upload-file.png"} height={150} width={150} />
+                </div>
                 <h4 className="text-2xl font-semibold mb-4 text-blue-600">Step 2</h4>
                 <p className="text-gray-600">Upload your files securely.</p>
               </div>
               <div className="w-80 p-6 bg-white shadow-xl rounded-lg text-center transform transition duration-300 hover:scale-105 hover:shadow-2xl">
+              <div className="flex flex-col justify-center items-center"> {/* Add 'items-center' class */}
+                  <Image src={"/face.png"} height={150} width={150} />
+                </div>
                 <h4 className="text-2xl font-semibold mb-4 text-blue-600">Step 3</h4>
                 <p className="text-gray-600">Access your files using facial recognition.</p>
               </div>
@@ -92,15 +110,25 @@ export default function Home() {
             <p className="text-gray-600">&copy; 2024 BoxMe. All rights reserved.</p>
             <div className="flex justify-center space-x-6 mt-4">
               <a href="#" className="text-gray-600 hover:text-blue-700 transition duration-300">
+              <div className="flex flex-col justify-center items-center"> {/* Add 'items-center' class */}
+                  <Image src={"/facebook-app-symbol.png"} height={30} width={30} />
+                </div>
                 Facebook
               </a>
               <a href="#" className="text-gray-600 hover:text-blue-700 transition duration-300">
+              <div className="flex flex-col justify-center items-center"> {/* Add 'items-center' class */}
+                  <Image src={"/twitter.png"} height={30} width={30} />
+                </div>
                 Twitter
               </a>
               <a href="#" className="text-gray-600 hover:text-blue-700 transition duration-300">
+              <div className="flex flex-col justify-center items-center"> {/* Add 'items-center' class */}
+                  <Image src={"/linkedin.png"} height={30} width={30} />
+                </div>
                 LinkedIn
               </a>
             </div>
+            <a href="https://www.flaticon.com/free-icons/face-id" title="face id icons">Face id icons created by TravisAvery - Flaticon</a>
           </footer>
         </main>
       </>

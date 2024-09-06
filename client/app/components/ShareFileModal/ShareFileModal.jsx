@@ -5,7 +5,6 @@ import {  TrashIcon } from '@heroicons/react/24/outline';
 
 const ShareModal = ({ isOpen, onClose, fileData, contract, ownerAddress }) => {
     if (!fileData) return null;
-
     const [otherUserAddress, setOthUserAdd] = useState('');
     const [sharedUsers, setSharedUsers] = useState([
     ]);
@@ -14,7 +13,7 @@ const ShareModal = ({ isOpen, onClose, fileData, contract, ownerAddress }) => {
 
     const fetchSharedUsers = async () => {
         try {
-            const sharedUsersList = await contract.shareAccessList(ownerAddress, fileCID);
+            const sharedUsersList = await contract.getAccessList(ownerAddress, fileCID);
             setSharedUsers(sharedUsersList);
         } catch (e) {
             console.error("Failed to fetch shared users:", e.message);
@@ -31,30 +30,25 @@ const ShareModal = ({ isOpen, onClose, fileData, contract, ownerAddress }) => {
             console.log(e.message);
         }
         setOthUserAdd('');
-        // onClose();
     };
+
     const handleShareAccessRemove = async (userToRemove) => {
         let dataArray;
         try {
             dataArray = await contract.disallowAccess(ownerAddress, fileCID, userToRemove);
-            await fetchSharedUsers();
             alert('File Access Removed');
+            await fetchSharedUsers();
         } catch (e) {
             console.log(e.message);
         }
         setOthUserAdd('');
-        // onClose();
     };
 
 
     useEffect(() => {
         if (!isOpen) return;
         fetchSharedUsers();
-        console.log("useEffect called with isOpen, fileUrl:", isOpen, fileCID);
-    }, [isOpen]); // Dependencies: isOpen, fileUrl, and contract
-
-    // Debugging step: Ensure useEffect is called
-
+    }, [isOpen]);
 
     if (!isOpen) return null;
 

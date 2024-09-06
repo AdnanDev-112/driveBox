@@ -7,8 +7,6 @@ async function createSession() {
     const response = await rekognitionClient.createFaceLivenessSession();
 
     const sessionId = response.SessionId;
-    console.log("SessionId:", sessionId);
-
     return sessionId;
 }
 

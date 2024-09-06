@@ -8,7 +8,8 @@
     "@nomicfoundation/hardhat-verify": "^2.0.9",
     "@nomicfoundation/ignition-core": "^0.15.5",
     "ethers": "^6.13.2",
-    "hardhat": "^2.22.6"
+    "hardhat": "^2.22.6",
+    "hardhat-gas-reporter": "^2.2.1"
   },
   "dependencies": {
     "chai": "^5.1.1",

@@ -4,8 +4,6 @@ const secretKey = "TEST";
 export async function POST(req) {
 
   const authHeader = req.headers.get('authorization');
-  console.log(authHeader,"auth hea?");
-
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
 	return new Response(JSON.stringify({ error: 'Invalid token' }), {
 	  status: 401,
@@ -18,9 +16,7 @@ export async function POST(req) {
   try {
 	// Verify the JWT token
 	const decoded = jwt.verify(token, secretKey);
-	console.log(decoded,"Decoded is here");
 	const currentTime = Math.floor(Date.now() / 1000);
-	console.log(currentTime);
 
 	if (decoded.exp < currentTime) {
 	  return new Response(JSON.stringify({ message: 'Expired' }), {

@@ -1,12 +1,5 @@
-// require("@nomicfoundation/hardhat-toolbox");
-
-// /** @type import('hardhat/config').HardhatUserConfig */
-// module.exports = {
-//   solidity: "0.8.24",
-// };
-// require("@nomicfoundation/hardhat-toolbox");
 require("@nomicfoundation/hardhat-ignition-ethers");
-
+require("hardhat-gas-reporter");
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -19,7 +12,12 @@ module.exports = {
   paths: {
     artifacts: "./client/app/components/artifacts",
   },
+  gasReporter: {
+    enabled: true,
+    currency: 'GBP',  
+    gasPrice: 1.273097437,
+    showTimeSpent: true,
+    precision: 8,
+  }
 };
 
-
-// Contract Address : 0x5FbDB2315678afecb367f032d93F642f64180aa3
